@@ -14,7 +14,7 @@
 
 해당 구글 클라우드 접속을 한다.
 
-![alt text](image.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-1.png)
 - Agent Platform 클릭
 
  
