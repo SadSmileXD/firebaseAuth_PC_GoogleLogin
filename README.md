@@ -14,47 +14,47 @@
 
 해당 구글 클라우드 접속을 한다.
 
-![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-1.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image.png)
 - Agent Platform 클릭
 
  
 
-![alt text](image-1.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-1.png)
 
 - Google Cloud 옆에 클릭
 
-![alt text](image-2.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-2.png)
 
 - 새 프로젝트 만들기 클릭
 
-![alt text](image-3.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-3.png)
 
 - 설정 후 만들기 클릭
 
-![alt text](image-4.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-4.png)
 - API 및 서비스 클릭
 
-![alt text](image-5.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-5.png)
 
 - 사용자 인증 정보 클릭
 
-![alt text](image-6.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-6.png)
 
 - 사용자 인증 정보 만들기 클릭
 
-![alt text](image-7.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-7.png)
 
 - OAuth 클라이언트 ID 클릭
 
-![alt text](image-8.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-8.png)
 
 - 동의 화면 구성 클릭
 
-![alt text](image-9.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-9.png)
 
 - 시작하기 클릭
 
-![alt text](image-10.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-10.png)
 
 - 『 앱 이름 』설정 후 사용자 『 이메일 지정 』 다음 클릭
 
