@@ -58,37 +58,37 @@
 
 - 『 앱 이름 』설정 후 사용자 『 이메일 지정 』 다음 클릭
 
-![alt text](image-11.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-11.png)
 
 - 나는 외부 설정함.
 
-![alt text](image-12.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-12.png)
 
 - 이메일 등록 후 다음 클릭
 
-![alt text](image-13.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-13.png)
 
 - 완료  체크 후 계속 클릭
 
-![alt text](image-14.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-14.png)
 
 - 완료 후 만들기 클릭
 
-![alt text](image-15.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-15.png)
 
 - 다시 사용자 인증 정보로 돌아오기.
 
-![alt text](image-16.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-16.png)
 
 - OAuth 클라이언트 ID 클릭
 
-![alt text](image-17.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-17.png)
 - 승인된 리디렉션 url 추가해야함.
 - 『 http://127.0.0.1:7123/ 』 추가
 
-![alt text](image-18.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-18.png)
 
-![alt text](image-19.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-19.png)
 
 기억 해둬여 할 클라이언트 ID / 클라이언트 보안 비밀번호 기억 또는 저장 해둬야함.
 
@@ -96,13 +96,13 @@
 
 ---
 # firebase 설정하기.
-![alt text](image-20.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-20.png)
 
 - firebase로 가서 Auth에 로그인 방법에 구글 사용처리 후
 - 외부 프로젝트의 클라이언트 ID허용 목록에 추가 클릭  
 (Auth에 구글 로그인 사용처리 해야 설정가능. ) 
  
-![alt text](image-22.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-22.png)
 
 - 아까 저장해둔  구글 클라우드 ID 삽입
 - 구글 회원가입 / 자동로그인  코드
@@ -304,10 +304,10 @@
     ```
     
 
-![alt text](image-23.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-23.png)
 
 코드에 아까 저장한 클라이언트 ID 와 비밀번호 넣기
-![alt text](image-24.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-24.png)
 
 - 컨텍스메뉴로 실행
 
@@ -316,8 +316,8 @@
 나는 로그인 성공 이력이 있어서 이런 화면이 뜨는데 
 계정 로그인하면된다.
 
-![alt text](image-25.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-25.png)
 
-![alt text](image-26.png)
+![alt text](https://github.com/SadSmileXD/firebaseAuth_PC_GoogleLogin/blob/main/image/image-26.png)
 
 계정 생성 결과.
