@@ -461,8 +461,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f9351b3017622b4d9cecc5f66a86f05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GoogleTokenFetcher
-  webClientId: 
-  webClientSecret: 
+  webClientId: 663448081731-ljlvhbo2h3l93arvknctoh8kochj3os8.apps.googleusercontent.com
+  webClientSecret: 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
 --- !u!4 &1983470015
 Transform:
   m_ObjectHideFlags: 0

@@ -72,11 +72,70 @@ public class GoogleTokenFetcher : MonoBehaviour
         }
     }
 
+    //private async Task<TokenResponse> FetchTokenFromGoogleAsync()
+    //{
+    //    // GCP 콘솔에 등록된 URI와 정확히 일치하는 리다이렉트 주소
+    //    string redirectUri = $"http://127.0.0.1:{LocalPort}/";
+
+    //    using (HttpListener listener = new HttpListener())
+    //    {
+    //        try
+    //        {
+    //            listener.Prefixes.Add(redirectUri);
+    //            listener.Start();
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Debug.LogError($"HttpListener 시작 실패 (포트 {LocalPort}가 사용 중일 수 있습니다): {ex.Message}");
+    //            return null;
+    //        }
+
+    //        string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+    //        string scope = Uri.EscapeDataString("openid email profile");
+
+    //        StringBuilder urlBuilder = new StringBuilder();
+    //        urlBuilder.Append($"{authorizationEndpoint}?");
+    //        urlBuilder.Append($"response_type=code");
+    //        urlBuilder.Append($"&client_id={webClientId}");
+    //        urlBuilder.Append($"&redirect_uri={Uri.EscapeDataString(redirectUri)}");
+    //        urlBuilder.Append($"&scope={scope}");
+
+    //        Application.OpenURL(urlBuilder.ToString());
+
+    //        HttpListenerContext context = await listener.GetContextAsync();
+    //        HttpListenerRequest request = context.Request;
+
+    //        string code = request.QueryString.Get("code");
+
+    //        string responseString = "<html><body style='text-align:center; padding-top:50px; font-family:sans-serif;'>" +
+    //                                "<h1>Google Login Completed!</h1>" +
+    //                                "<p>You can close this window and return to Unity.</p>" +
+    //                                "</body></html>";
+
+    //        byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+    //        context.Response.ContentEncoding = Encoding.UTF8;
+    //        context.Response.ContentType = "text/html; charset=utf-8";
+    //        context.Response.ContentLength64 = buffer.Length;
+
+    //        await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+    //        context.Response.OutputStream.Close();
+
+    //        listener.Stop();
+
+    //        if (string.IsNullOrEmpty(code))
+    //        {
+    //            Debug.LogError("인증 코드(Auth Code)를 받지 못했습니다.");
+    //            return null;
+    //        }
+
+    //        Debug.Log($"2. 인증 코드(Auth Code) 획득 성공");
+
+    //        return await ExchangeCodeForTokenAsync(code, redirectUri);
+    //    }
+    //}
     private async Task<TokenResponse> FetchTokenFromGoogleAsync()
     {
-        // GCP 콘솔에 등록된 URI와 정확히 일치하는 리다이렉트 주소
         string redirectUri = $"http://127.0.0.1:{LocalPort}/";
-
         using (HttpListener listener = new HttpListener())
         {
             try
@@ -86,54 +145,65 @@ public class GoogleTokenFetcher : MonoBehaviour
             }
             catch (Exception ex)
             {
-                Debug.LogError($"HttpListener 시작 실패 (포트 {LocalPort}가 사용 중일 수 있습니다): {ex.Message}");
+                Debug.LogError($"HttpListener 시작 실패: {ex.Message}");
                 return null;
             }
 
-            string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
-            string scope = Uri.EscapeDataString("openid email profile");
-
-            StringBuilder urlBuilder = new StringBuilder();
-            urlBuilder.Append($"{authorizationEndpoint}?");
-            urlBuilder.Append($"response_type=code");
-            urlBuilder.Append($"&client_id={webClientId}");
-            urlBuilder.Append($"&redirect_uri={Uri.EscapeDataString(redirectUri)}");
-            urlBuilder.Append($"&scope={scope}");
-
-            Application.OpenURL(urlBuilder.ToString());
-
-            HttpListenerContext context = await listener.GetContextAsync();
-            HttpListenerRequest request = context.Request;
-
-            string code = request.QueryString.Get("code");
-
-            string responseString = "<html><body style='text-align:center; padding-top:50px; font-family:sans-serif;'>" +
-                                    "<h1>Google Login Completed!</h1>" +
-                                    "<p>You can close this window and return to Unity.</p>" +
-                                    "</body></html>";
-
-            byte[] buffer = Encoding.UTF8.GetBytes(responseString);
-            context.Response.ContentEncoding = Encoding.UTF8;
-            context.Response.ContentType = "text/html; charset=utf-8";
-            context.Response.ContentLength64 = buffer.Length;
-
-            await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            context.Response.OutputStream.Close();
-
-            listener.Stop();
-
-            if (string.IsNullOrEmpty(code))
+            try
             {
-                Debug.LogError("인증 코드(Auth Code)를 받지 못했습니다.");
+                // OAuth 요청 URL 생성 (state 추가 권장)
+                string state = Guid.NewGuid().ToString("N");
+                string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+                string scope = Uri.EscapeDataString("openid email profile");
+
+                string url = $"{authorizationEndpoint}?response_type=code" +
+                             $"&client_id={webClientId}" +
+                             $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+                             $"&scope={scope}" +
+                             $"&state={state}";
+
+                Application.OpenURL(url);
+
+                // 비동기로 브라우저 응답 대기
+                HttpListenerContext context = await listener.GetContextAsync();
+                HttpListenerRequest request = context.Request;
+
+                string code = request.QueryString.Get("code");
+
+                // HTML 응답 반환
+                string responseString = "<html><body style='text-align:center; padding-top:50px;'>" +
+                                        "<h1>Login Completed!</h1>" +
+                                        "<p>You can close this window now.</p></body></html>";
+
+                byte[] buffer = Encoding.UTF8.GetBytes(responseString);
+                context.Response.ContentType = "text/html; charset=utf-8";
+                context.Response.ContentLength64 = buffer.Length;
+                await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                context.Response.OutputStream.Close();
+
+                if (string.IsNullOrEmpty(code))
+                {
+                    Debug.LogError("인증 코드를 수신하지 못했습니다.");
+                    return null;
+                }
+
+                return await ExchangeCodeForTokenAsync(code, redirectUri);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"인증 과정 중 예외 발생: {ex.Message}");
                 return null;
             }
-
-            Debug.Log($"2. 인증 코드(Auth Code) 획득 성공");
-
-            return await ExchangeCodeForTokenAsync(code, redirectUri);
+            finally
+            {
+                // 예외가 발생하더라도 Listener를 안전하게 종료
+                if (listener.IsListening)
+                {
+                    listener.Stop();
+                }
+            }
         }
     }
-
     private async Task<TokenResponse> ExchangeCodeForTokenAsync(string code, string redirectUri)
     {
         Debug.Log("3. 인증 코드로 구글 서버에 토큰 교환 요청 중...");
