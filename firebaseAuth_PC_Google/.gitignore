@@ -1,0 +1,12 @@
+Library
+Logs
+Temp
+UserSettings
+.vsconfig
+Assembly-CSharp.csproj
+The_Avarice.sln
+XNode.csproj
+XNodeEditor.csproj
+obj
+.vs
+Assembly-CSharp-firstpass.csproj
