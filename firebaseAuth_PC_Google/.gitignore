@@ -1,12 +1,56 @@
-Library
-Logs
-Temp
-UserSettings
-.vsconfig
-Assembly-CSharp.csproj
-The_Avarice.sln
-XNode.csproj
-XNodeEditor.csproj
-obj
-.vs
-Assembly-CSharp-firstpass.csproj
+# --- [ Unity 임시 및 자동 생성 파일 ] ---
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Logs]/
+[MemoryCaptures]/
+
+# --- [ 에디터 생성 파일 ] ---
+Assets/AssetStoreTools*
+
+# --- [ Visual Studio / VS Code 관련 ] ---
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.opendb
+*.VC.db
+
+# --- [ OS 관련 ] ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- [ 유니티 자동 생성 메타데이터 제외 (선택 사항) ] ---
+# 보통 메타데이터는 커밋해야 하지만, 아래 파일들은 제외하는 것이 일반적입니다.
+sysinfo.txt
+*.apk
+*.unitypackage
+
+# --- [ 빌드 결과물 ] ---
+*.exe
+*.app
+*.apk
+*.ipa
+
+
+-----Firebase------
+
+Firebase
+
+
+-------------
+
+
+01ImportAssets
