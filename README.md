@@ -1,7 +1,10 @@
 **※해당 문서는 아무것도 모르는 분들을 위해 최대한 자세하게 작성 했습니다.**
 
 
- 
+# 수정 사항
+-에디터 타임에서만 테스트를 진행했는데 통신 지연 발생으로 코드 수정함.  
+수정 이후 지연 시간 단축 기존 3분 현 10초 내  
+
 
 - 목차
     - [1. 구글 클라우드 설정 방법](#구글-클라우드-설정하기)
@@ -108,199 +111,244 @@
 - 구글 회원가입 / 자동로그인  코드
     
     ```csharp
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
-    using System.Threading.Tasks;
-    using UnityEngine;
-    using Firebase.Auth;
-    
-    public class GoogleTokenFetcher : MonoBehaviour
+  using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using Firebase.Auth;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+public class GoogleTokenFetcher : MonoBehaviour
+{
+    [Header("Firebase Web Client Credentials")]
+    [Tooltip("GCP 콘솔의 웹 애플리케이션 클라이언트 ID")]
+    [SerializeField] private string webClientId = "여기에_웹_클라이언트_ID_입력";
+
+    [Tooltip("GCP 콘솔의 웹 애플리케이션 클라이언트 보안 비밀번호")]
+    [SerializeField] private string webClientSecret = "여기에_웹_클라이언트_보안_비밀번호_입력";
+
+    private const int LocalPort = 7123;
+
+    private FirebaseAuth auth;
+
+    public Button m_btn;
+
+    private void Start()
     {
-        [Header("Firebase Web Client Credentials")]
-        [Tooltip("GCP 콘솔의 웹 애플리케이션 클라이언트 ID")]
-        [SerializeField] private string webClientId = "여기에_웹_클라이언트_ID_입력";
-    
-        [Tooltip("GCP 콘솔의 웹 애플리케이션 클라이언트 보안 비밀번호")]
-        [SerializeField] private string webClientSecret = "여기에_웹_클라이언트_보안_비밀번호_입력";
-    
-        // redirect_uri_mismatch 방지를 위한 고정 포트 설정
-        private const int LocalPort = 7123;
-    
-        private FirebaseAuth auth;
-    
-        private void Start()
+        auth = FirebaseAuth.DefaultInstance;
+        if (m_btn != null)
         {
-            auth = FirebaseAuth.DefaultInstance;
-        }
-    
-        [ContextMenu("Get Google Token & Firebase Auth Test")]
-        public async void GetGoogleToken()
-        {
-            Debug.Log("1. 구글 로그인 웹 브라우저를 엽니다...");
-    
-            TokenResponse tokenData = await FetchTokenFromGoogleAsync();
-    
-            if (tokenData != null && !string.IsNullOrEmpty(tokenData.id_token))
-            {
-                Debug.Log("<color=green><b>[구글 토큰 발급 성공!]</b></color>");
-                Debug.Log($"<b>ID Token:</b>\n{tokenData.id_token}");
-    
-                await SignInWithFirebaseAsync(tokenData.id_token, tokenData.access_token);
-            }
-            else
-            {
-                Debug.LogError("구글 토큰 발급 실패");
-            }
-        }
-    
-        private async Task SignInWithFirebaseAsync(string idToken, string accessToken)
-        {
-            Debug.Log("4. Firebase Authentication에 인증 요청 중...");
-    
-            try
-            {
-                Credential credential = GoogleAuthProvider.GetCredential(idToken, accessToken);
-    
-                FirebaseUser user = await auth.SignInWithCredentialAsync(credential);
-    
-                if (user != null)
-                {
-                    Debug.Log("<color=cyan><b>[Firebase 인증 및 회원가입 성공!]</b></color>");
-                    Debug.Log($"<b>Firebase UID:</b> {user.UserId}");
-                    Debug.Log($"<b>이름:</b> {user.DisplayName}");
-                    Debug.Log($"<b>이메일:</b> {user.Email}");
-               
-                  
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"[Firebase 로그인 실패] {ex.Message}");
-            }
-        }
-    
-        private async Task<TokenResponse> FetchTokenFromGoogleAsync()
-        {
-            // GCP 콘솔에 등록된 URI와 정확히 일치하는 리다이렉트 주소
-            string redirectUri = $"http://127.0.0.1:{LocalPort}/";
-    
-            using (HttpListener listener = new HttpListener())
-            {
-                try
-                {
-                    listener.Prefixes.Add(redirectUri);
-                    listener.Start();
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"HttpListener 시작 실패 (포트 {LocalPort}가 사용 중일 수 있습니다): {ex.Message}");
-                    return null;
-                }
-    
-                string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
-                string scope = Uri.EscapeDataString("openid email profile");
-    
-                StringBuilder urlBuilder = new StringBuilder();
-                urlBuilder.Append($"{authorizationEndpoint}?");
-                urlBuilder.Append($"response_type=code");
-                urlBuilder.Append($"&client_id={webClientId}");
-                urlBuilder.Append($"&redirect_uri={Uri.EscapeDataString(redirectUri)}");
-                urlBuilder.Append($"&scope={scope}");
-    
-                Application.OpenURL(urlBuilder.ToString());
-    
-                HttpListenerContext context = await listener.GetContextAsync();
-                HttpListenerRequest request = context.Request;
-    
-                string code = request.QueryString.Get("code");
-    
-                string responseString = "<html><body style='text-align:center; padding-top:50px; font-family:sans-serif;'>" +
-                                        "<h1>Google Login Completed!</h1>" +
-                                        "<p>You can close this window and return to Unity.</p>" +
-                                        "</body></html>";
-    
-                byte[] buffer = Encoding.UTF8.GetBytes(responseString);
-                context.Response.ContentEncoding = Encoding.UTF8;
-                context.Response.ContentType = "text/html; charset=utf-8";
-                context.Response.ContentLength64 = buffer.Length;
-    
-                await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                context.Response.OutputStream.Close();
-    
-                listener.Stop();
-    
-                if (string.IsNullOrEmpty(code))
-                {
-                    Debug.LogError("인증 코드(Auth Code)를 받지 못했습니다.");
-                    return null;
-                }
-    
-                Debug.Log($"2. 인증 코드(Auth Code) 획득 성공");
-    
-                return await ExchangeCodeForTokenAsync(code, redirectUri);
-            }
-        }
-    
-        private async Task<TokenResponse> ExchangeCodeForTokenAsync(string code, string redirectUri)
-        {
-            Debug.Log("3. 인증 코드로 구글 서버에 토큰 교환 요청 중...");
-    
-            string tokenEndpoint = "https://oauth2.googleapis.com/token";
-    
-            string postData = $"code={Uri.EscapeDataString(code)}" +
-                              $"&client_id={Uri.EscapeDataString(webClientId)}" +
-                              $"&client_secret={Uri.EscapeDataString(webClientSecret)}" +
-                              $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
-                              $"&grant_type=authorization_code";
-    
-            byte[] data = Encoding.UTF8.GetBytes(postData);
-    
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(tokenEndpoint);
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.ContentLength = data.Length;
-    
-            try
-            {
-                using (Stream stream = await request.GetRequestStreamAsync())
-                {
-                    await stream.WriteAsync(data, 0, data.Length);
-                }
-    
-                using (WebResponse response = await request.GetResponseAsync())
-                using (StreamReader reader = new StreamReader(response.GetResponseStream()))
-                {
-                    string json = await reader.ReadToEndAsync();
-                    return JsonUtility.FromJson<TokenResponse>(json);
-                }
-            }
-            catch (WebException webEx)
-            {
-                if (webEx.Response != null)
-                {
-                    using (StreamReader reader = new StreamReader(webEx.Response.GetResponseStream()))
-                    {
-                        string errorResponse = await reader.ReadToEndAsync();
-                        Debug.LogError($"[Google Response Error] {errorResponse}");
-                    }
-                }
-                return null;
-            }
-        }
-    
-        [Serializable]
-        public class TokenResponse
-        {
-            public string id_token;
-            public string access_token;
-            public int expires_in;
-            public string token_type;
+            m_btn.onClick.AddListener(GetGoogleToken);
         }
     }
-    
+
+    [ContextMenu("Get Google Token & Firebase Auth Test")]
+    public async void GetGoogleToken()
+    {
+        Debug.Log("1. 구글 로그인 웹 브라우저를 엽니다...");
+
+        TokenResponse tokenData = await FetchTokenFromGoogleAsync();
+
+        if (tokenData != null && !string.IsNullOrEmpty(tokenData.id_token))
+        {
+            Debug.Log("<color=green><b>[구글 토큰 발급 성공!]</b></color>");
+            Debug.Log($"<b>ID Token:</b>\n{tokenData.id_token}");
+
+            await SignInWithFirebaseAsync(tokenData.id_token, tokenData.access_token);
+        }
+        else
+        {
+            Debug.LogError("구글 토큰 발급 실패");
+        }
+    }
+
+    private async Task<TokenResponse> FetchTokenFromGoogleAsync()
+    {
+        string redirectUri = $"http://127.0.0.1:{LocalPort}/";
+        TcpListener tcpListener = null;
+
+        try
+        {
+            // IPAddress.Loopback (127.0.0.1) 바인딩으로 소켓 수신 시작
+            tcpListener = new TcpListener(IPAddress.Loopback, LocalPort);
+            tcpListener.Start();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"TcpListener 시작 실패 (포트 {LocalPort}가 이미 사용 중입니다): {ex.Message}");
+            return null;
+        }
+
+        string authorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+        string scope = Uri.EscapeDataString("openid email profile");
+
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.Append($"{authorizationEndpoint}?");
+        urlBuilder.Append($"response_type=code");
+        urlBuilder.Append($"&client_id={webClientId}");
+        urlBuilder.Append($"&redirect_uri={Uri.EscapeDataString(redirectUri)}");
+        urlBuilder.Append($"&scope={scope}");
+
+        Application.OpenURL(urlBuilder.ToString());
+
+        string code = null;
+
+        try
+        {
+            // 브라우저 리다이렉트 소켓 연결 대기
+            using (TcpClient client = await tcpListener.AcceptTcpClientAsync())
+            using (NetworkStream stream = client.GetStream())
+            {
+                // 1. Raw Byte 수신 (StreamReader의 개행 대기 타임아웃 차단)
+                byte[] requestBuffer = new byte[2048];
+                int bytesRead = await stream.ReadAsync(requestBuffer, 0, requestBuffer.Length);
+                string requestText = Encoding.UTF8.GetString(requestBuffer, 0, bytesRead);
+
+                if (!string.IsNullOrEmpty(requestText) && requestText.StartsWith("GET"))
+                {
+                    // "GET /?code=XXXXXX HTTP/1.1" 형태에서 code 추출
+                    int codeIndex = requestText.IndexOf("code=");
+                    if (codeIndex != -1)
+                    {
+                        string paramSubstring = requestText.Substring(codeIndex + 5);
+                        int spaceOrAmp = paramSubstring.IndexOfAny(new char[] { ' ', '&' });
+                        code = (spaceOrAmp != -1) ? paramSubstring.Substring(0, spaceOrAmp) : paramSubstring;
+                        code = Uri.UnescapeDataString(code);
+                    }
+                }
+
+                // 2. 브라우저 응답 HTML 생성
+                string responseHtml = "<html><head><meta charset='utf-8'></head>" +
+                                       "<body style='text-align:center; padding-top:50px; font-family:sans-serif;'>" +
+                                       "<h1>Google Login Completed!</h1>" +
+                                       "<p>You can close this window and return to Unity.</p>" +
+                                       "</body></html>";
+
+                byte[] htmlBytes = Encoding.UTF8.GetBytes(responseHtml);
+
+                // 3. Raw HTTP 응답 헤더 작성 (Connection: close 필수)
+                string header = "HTTP/1.1 200 OK\r\n" +
+                                "Content-Type: text/html; charset=utf-8\r\n" +
+                                $"Content-Length: {htmlBytes.Length}\r\n" +
+                                "Connection: close\r\n\r\n";
+
+                byte[] headerBytes = Encoding.UTF8.GetBytes(header);
+
+                // 4. 헤더와 바디 전송 후 즉시 소켓 강제 종료 (Keep-Alive 대기 즉시 해제)
+                await stream.WriteAsync(headerBytes, 0, headerBytes.Length);
+                await stream.WriteAsync(htmlBytes, 0, htmlBytes.Length);
+                await stream.FlushAsync();
+
+                client.Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"소켓 수신 중 오류 발생: {ex.Message}");
+            return null;
+        }
+        finally
+        {
+            tcpListener.Stop();
+        }
+
+        if (string.IsNullOrEmpty(code))
+        {
+            Debug.LogError("인증 코드(Auth Code)를 파싱하지 못했습니다.");
+            return null;
+        }
+
+        Debug.Log($"2. 인증 코드(Auth Code) 획득 성공");
+
+        return await ExchangeCodeForTokenAsync(code, redirectUri);
+    }
+
+    private async Task<TokenResponse> ExchangeCodeForTokenAsync(string code, string redirectUri)
+    {
+        Debug.Log("3. 인증 코드로 구글 서버에 토큰 교환 요청 중...");
+
+        string tokenEndpoint = "https://oauth2.googleapis.com/token";
+
+        string postData = $"code={Uri.EscapeDataString(code)}" +
+                          $"&client_id={Uri.EscapeDataString(webClientId)}" +
+                          $"&client_secret={Uri.EscapeDataString(webClientSecret)}" +
+                          $"&redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+                          $"&grant_type=authorization_code";
+
+        byte[] data = Encoding.UTF8.GetBytes(postData);
+
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(tokenEndpoint);
+        request.Method = "POST";
+        request.ContentType = "application/x-www-form-urlencoded";
+        request.ContentLength = data.Length;
+
+        try
+        {
+            using (Stream stream = await request.GetRequestStreamAsync())
+            {
+                await stream.WriteAsync(data, 0, data.Length);
+            }
+
+            using (WebResponse response = await request.GetResponseAsync())
+            using (StreamReader reader = new StreamReader(response.GetResponseStream()))
+            {
+                string json = await reader.ReadToEndAsync();
+                return JsonUtility.FromJson<TokenResponse>(json);
+            }
+        }
+        catch (WebException webEx)
+        {
+            if (webEx.Response != null)
+            {
+                using (StreamReader reader = new StreamReader(webEx.Response.GetResponseStream()))
+                {
+                    string errorResponse = await reader.ReadToEndAsync();
+                    Debug.LogError($"[Google Response Error] {errorResponse}");
+                }
+            }
+            return null;
+        }
+    }
+
+    private async Task SignInWithFirebaseAsync(string idToken, string accessToken)
+    {
+        Debug.Log("4. Firebase Authentication에 인증 요청 중...");
+
+        try
+        {
+            Credential credential = GoogleAuthProvider.GetCredential(idToken, accessToken);
+
+            FirebaseUser user = await auth.SignInWithCredentialAsync(credential);
+
+            if (user != null)
+            {
+                Debug.Log("<color=cyan><b>[Firebase 인증 및 회원가입 성공!]</b></color>");
+                Debug.Log($"<b>Firebase UID:</b> {user.UserId}");
+                Debug.Log($"<b>이름:</b> {user.DisplayName}");
+                Debug.Log($"<b>이메일:</b> {user.Email}");
+
+                SceneManager.LoadScene(2);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[Firebase 로그인 실패] {ex.Message}");
+        }
+    }
+
+    [Serializable]
+    public class TokenResponse
+    {
+        public string id_token;
+        public string access_token;
+        public int expires_in;
+        public string token_type;
+    }
+}
     ```
     
 
